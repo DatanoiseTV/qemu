@@ -173,17 +173,11 @@ if [ ! -f "third_party/zerotier/libzerotier.a" ]; then
         fi
     done
     
-    # Add any rustybits static library if it exists
+    # Handle rustybits library separately - merge with main library
+    RUST_STATIC_LIB=""
     if [ -f "rustybits/target/release/libzeroidc.a" ]; then
-        echo "Found rustybits library, extracting objects..."
-        mkdir -p ../zerotier/rust-objs
-        cd ../zerotier/rust-objs
-        ar x ../../zerotier-src/rustybits/target/release/libzeroidc.a
-        RUST_OBJS=$(find . -name "*.o" 2>/dev/null || true)
-        if [ -n "$RUST_OBJS" ]; then
-            OBJECT_FILES="$OBJECT_FILES $RUST_OBJS"
-        fi
-        cd ../../zerotier-src
+        echo "Found rustybits library - will merge with main library"
+        RUST_STATIC_LIB="rustybits/target/release/libzeroidc.a"
     fi
     
     if [ -z "$OBJECT_FILES" ]; then
@@ -195,6 +189,28 @@ if [ ! -f "third_party/zerotier/libzerotier.a" ]; then
     
     echo "Creating static library with $(echo $OBJECT_FILES | wc -w) object files..."
     ar rcs ../zerotier/libzerotier.a $OBJECT_FILES
+    
+    # Merge rust static library if available
+    if [ -n "$RUST_STATIC_LIB" ] && [ -f "$RUST_STATIC_LIB" ]; then
+        echo "Merging rust static library..."
+        # Extract rust objects to temporary directory
+        TEMP_DIR=$(mktemp -d)
+        cd "$TEMP_DIR"
+        ar x "../$RUST_STATIC_LIB" 2>/dev/null || {
+            echo "Warning: Could not extract rust objects, using library as-is"
+            cd - > /dev/null
+        }
+        
+        # Add non-problematic objects to our library
+        RUST_OBJECTS=$(ls *.o 2>/dev/null | grep -v "compiler_builtins" | head -20 || true)
+        if [ -n "$RUST_OBJECTS" ]; then
+            echo "Adding $(echo $RUST_OBJECTS | wc -w) rust objects to main library..."
+            ar rs ../zerotier/libzerotier.a $RUST_OBJECTS 2>/dev/null || echo "Warning: Some rust objects could not be added"
+        fi
+        
+        cd - > /dev/null
+        rm -rf "$TEMP_DIR"
+    fi
     
     if [ ! -f "../zerotier/libzerotier.a" ]; then
         echo "Error: Failed to create static library"

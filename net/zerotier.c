@@ -55,7 +55,16 @@ typedef struct ZeroTierState {
     IOHandler *udp_read_handler; /* Event-driven UDP handler */
 } ZeroTierState;
 
-static ZeroTierState *global_zt_state = NULL;
+/* Global ZeroTier node shared across all network interfaces */
+static ZT_Node *global_zt_node = NULL;
+static int global_udp_sock = -1;
+static QEMUTimer *global_timer = NULL;
+static char *global_storage_path = NULL;
+static int global_port = ZEROTIER_DEFAULT_PORT;
+static int zt_instance_count = 0;
+
+/* List of active ZeroTier network states for demultiplexing */
+static ZeroTierState *zt_networks[16] = {0}; /* Support up to 16 networks */
 static uint8_t zerotier_suggested_mac[6] = {0};  /* MAC for NIC to use */
 
 

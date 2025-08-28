@@ -569,7 +569,7 @@ static int net_zerotier_init(NetClientState *peer, const char *model,
     
     global_zt_state = s;
     
-    qemu_set_info_str(nc, "network=%s,port=%d", network, s->port);
+    qemu_set_info_str(nc, "network=%016llx,port=%d", (unsigned long long)s->network_id, s->port);
     
     /* Initialize ZeroTier callbacks */
     memset(&callbacks, 0, sizeof(callbacks));

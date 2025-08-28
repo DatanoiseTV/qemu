@@ -209,7 +209,6 @@ void qemu_macaddr_default_if_unset(MACAddr *macaddr)
 {
     static const MACAddr zero = { .a = { 0,0,0,0,0,0 } };
     static const MACAddr base = { .a = { 0x52, 0x54, 0x00, 0x12, 0x34, 0 } };
-    extern bool net_zerotier_get_mac(uint8_t *mac);
 
     if (memcmp(macaddr, &zero, sizeof(zero)) != 0) {
         if (memcmp(macaddr->a, &base.a, (sizeof(base.a) - 1)) != 0) {

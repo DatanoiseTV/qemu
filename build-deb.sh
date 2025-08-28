@@ -163,7 +163,7 @@ if [ ! -f "third_party/zerotier/libzerotier.a" ]; then
     done
     
     # Add external library objects
-    for extdir in ext/miniupnpc ext/libnatpmp ext/http-parser; do
+    for extdir in ext/miniupnpc ext/libnatpmp ext/http-parser ext/ed25519-amd64-asm; do
         if [ -d "$extdir" ]; then
             EXT_OBJ_FILES=$(find "$extdir" -name "*.o" 2>/dev/null || true)
             if [ -n "$EXT_OBJ_FILES" ]; then

@@ -274,7 +274,7 @@ static void zerotier_event_callback(
 static int zerotier_state_get(ZT_Node *node, void *uptr, void *tptr, enum ZT_StateObjectType type, const uint64_t objid[2], void *data, unsigned int maxlen)
 {
     ZeroTierState *s = (ZeroTierState *)uptr;
-    char filename[512];
+    char filename[1024];
     FILE *f;
     size_t read_len;
     
@@ -313,7 +313,7 @@ static int zerotier_state_get(ZT_Node *node, void *uptr, void *tptr, enum ZT_Sta
 static void zerotier_state_put(ZT_Node *node, void *uptr, void *tptr, enum ZT_StateObjectType type, const uint64_t objid[2], const void *data, int len)
 {
     ZeroTierState *s = (ZeroTierState *)uptr;
-    char filename[512];
+    char filename[1024];
     char dirname[512];
     FILE *f;
     

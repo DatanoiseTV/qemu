@@ -1320,16 +1320,19 @@ if not get_option('zerotier').auto() or have_system
     zerotier_inc = include_directories('third_party/zerotier/include',
                                        'third_party/zerotier/node',
                                        'third_party/zerotier/osdep')
-    zerotier = declare_dependency(
-      include_directories: zerotier_inc,
-      link_args: [
-        zerotier_lib,
+    zerotier_link_args = [zerotier_lib, '-lstdc++']
+    if host_os == 'darwin'
+      zerotier_link_args += [
         '-framework', 'CoreServices',
         '-framework', 'SystemConfiguration',
         '-framework', 'CoreFoundation', 
         '-framework', 'Security',
-        '-lstdc++', '-lc++'
-      ],
+        '-lc++'
+      ]
+    endif
+    zerotier = declare_dependency(
+      include_directories: zerotier_inc,
+      link_args: zerotier_link_args,
       dependencies: []
     )
   else

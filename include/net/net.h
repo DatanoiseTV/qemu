@@ -197,6 +197,7 @@ bool qemu_get_vnet_hash_supported_types(NetClientState *nc, uint32_t *types);
 int qemu_set_vnet_le(NetClientState *nc, bool is_le);
 int qemu_set_vnet_be(NetClientState *nc, bool is_be);
 void qemu_macaddr_default_if_unset(MACAddr *macaddr);
+bool net_zerotier_get_mac(uint8_t *mac);
 /**
  * qemu_find_nic_info: Obtain NIC configuration information
  * @typename: Name of device object type

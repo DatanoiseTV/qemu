@@ -219,6 +219,12 @@ void qemu_macaddr_default_if_unset(MACAddr *macaddr)
         }
     }
 
+    /* Check if ZeroTier has a MAC for us to use */
+    if (net_zerotier_get_mac(macaddr->a)) {
+        qemu_macaddr_set_used(macaddr);
+        return;
+    }
+
     macaddr->a[0] = 0x52;
     macaddr->a[1] = 0x54;
     macaddr->a[2] = 0x00;
@@ -1269,6 +1275,9 @@ static int (* const net_client_init_fun[NET_CLIENT_DRIVER__MAX])(
         [NET_CLIENT_DRIVER_DGRAM]     = net_init_dgram,
 #ifdef CONFIG_VDE
         [NET_CLIENT_DRIVER_VDE]       = net_init_vde,
+#endif
+#ifdef CONFIG_ZEROTIER
+        [NET_CLIENT_DRIVER_ZEROTIER]  = net_init_zerotier,
 #endif
 #ifdef CONFIG_NETMAP
         [NET_CLIENT_DRIVER_NETMAP]    = net_init_netmap,

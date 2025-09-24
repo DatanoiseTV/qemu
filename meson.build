@@ -1311,6 +1311,37 @@ if vde.found() and not cc.links('''
   endif
 endif
 
+zerotier = not_found
+if not get_option('zerotier').auto() or have_system
+  zerotier_path = meson.current_source_dir() / 'third_party' / 'zerotier'
+  zerotier_lib = zerotier_path / 'libzerotier.a'
+  
+  if fs.exists(zerotier_path / 'include' / 'ZeroTierOne.h') and fs.exists(zerotier_lib)
+    zerotier_inc = include_directories('third_party/zerotier/include',
+                                       'third_party/zerotier/node',
+                                       'third_party/zerotier/osdep')
+    zerotier_link_args = [zerotier_lib, '-lstdc++']
+    if host_os == 'darwin'
+      zerotier_link_args += [
+        '-framework', 'CoreServices',
+        '-framework', 'SystemConfiguration',
+        '-framework', 'CoreFoundation', 
+        '-framework', 'Security',
+        '-lc++'
+      ]
+    endif
+    zerotier = declare_dependency(
+      include_directories: zerotier_inc,
+      link_args: zerotier_link_args,
+      dependencies: []
+    )
+  else
+    if get_option('zerotier').enabled()
+      error('ZeroTierOne not found or not built in third_party/zerotier')
+    endif
+  endif
+endif
+
 pulse = not_found
 if not get_option('pa').auto() or (host_os == 'linux' and have_system)
   pulse = dependency('libpulse', required: get_option('pa'),
@@ -2569,6 +2600,7 @@ config_host_data.set('CONFIG_TPM', have_tpm)
 config_host_data.set('CONFIG_TSAN', get_option('tsan'))
 config_host_data.set('CONFIG_USB_LIBUSB', libusb.found())
 config_host_data.set('CONFIG_VDE', vde.found())
+config_host_data.set('CONFIG_ZEROTIER', zerotier.found())
 config_host_data.set('CONFIG_VHOST', have_vhost)
 config_host_data.set('CONFIG_VHOST_NET', have_vhost_net)
 config_host_data.set('CONFIG_VHOST_NET_USER', have_vhost_net_user)
@@ -4956,6 +4988,7 @@ summary_info += {'AF_XDP support':    libxdp}
 summary_info += {'passt support':     enable_passt}
 summary_info += {'slirp support':     slirp}
 summary_info += {'vde support':       vde}
+summary_info += {'zerotier support':  zerotier}
 summary_info += {'netmap support':    have_netmap}
 summary_info += {'l2tpv3 support':    have_l2tpv3}
 summary(summary_info, bool_yn: true, section: 'Network backends')
